@@ -21,8 +21,46 @@ function App() {
   const [groceriesValue, setGroceriesValue] = useState(0);
   const [transportValue, setTransportValue] = useState(0);
 
+  // ✅ Step 2 — store cheapest boroughs
+  const [cheapestList, setCheapestList] = useState([]);
+
   const formatMoney = (value) =>
     `£${Number.isFinite(value) ? value.toFixed(0) : "0"}`;
+
+  // ✅ Helper: compute cheapest boroughs based on current housing + lifestyle
+  const getCheapestBoroughs = () => {
+    const ranked = Object.entries(rentData).map(([boroughName, rent]) => {
+      // utilities
+      let utilitiesKey = "single_flat";
+      if (housingType === "1-bed flat") utilitiesKey = "one_bed";
+
+      let lifestyleKey = "average";
+      if (lifestyle === "Frugal") lifestyleKey = "low";
+      if (lifestyle === "Comfortable") lifestyleKey = "high";
+
+      const utilities =
+        utilitiesData[utilitiesKey]?.[lifestyleKey] !== undefined
+          ? utilitiesData[utilitiesKey][lifestyleKey]
+          : 0;
+
+      // groceries
+      let groceriesKey = "single_medium";
+      if (lifestyle === "Frugal") groceriesKey = "single_low";
+      if (lifestyle === "Comfortable") groceriesKey = "single_high";
+
+      const groceries = groceryData[groceriesKey] || 0;
+
+      // transport (fixed for now)
+      const transport = transportData["zones_1_3"] || 0;
+
+      const totalCost = rent + utilities + groceries + transport;
+
+      return { boroughName, totalCost };
+    });
+
+    // Sort by cheapest → most expensive, return top 3
+    return ranked.sort((a, b) => a.totalCost - b.totalCost).slice(0, 3);
+  };
 
   const handleEstimate = () => {
     const incomeNum = Number(income);
@@ -34,6 +72,7 @@ function App() {
       setUtilitiesValue(0);
       setGroceriesValue(0);
       setTransportValue(0);
+      setCheapestList([]); // also reset this
       return;
     }
 
@@ -75,6 +114,9 @@ function App() {
     setUtilitiesValue(utilities);
     setGroceriesValue(groceries);
     setTransportValue(transport);
+
+    // ✅ Step 3 — update cheapest list whenever user estimates
+    setCheapestList(getCheapestBoroughs());
   };
 
   const boroughOptions = Object.keys(rentData).sort();
@@ -183,6 +225,23 @@ function App() {
               groceries={groceriesValue}
               transport={transportValue}
             />
+          </div>
+
+          {/* ✅ Step 4 — Top 3 Cheapest Boroughs UI */}
+          <div className="panel" style={{ marginTop: "16px" }}>
+            <h2>Top 3 Cheapest Boroughs</h2>
+            {cheapestList.length === 0 ? (
+              <p style={{ margin: 0 }}>Click "Estimate costs" to see suggestions.</p>
+            ) : (
+              <ul style={{ margin: 0, paddingLeft: "18px" }}>
+                {cheapestList.map((item) => (
+                  <li key={item.boroughName}>
+                    <strong>{item.boroughName}</strong> — £
+                    {item.totalCost.toFixed(0)} / month
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
       </main>
