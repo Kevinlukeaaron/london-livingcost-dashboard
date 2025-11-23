@@ -1,70 +1,59 @@
-# Getting Started with Create React App
+# London Living Cost Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An interactive dashboard that estimates **monthly cost of living in London** by borough, using **real UK datasets** (ONS rent, TFL fares, Ofgem & ONS/DEFRA cost estimates).
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🧠 What it does
 
-### `npm start`
+Given:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Net monthly income (£)
+- London borough
+- Housing type
+- Lifestyle (Frugal / Average / Comfortable)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+it calculates:
 
-### `npm test`
+- **Estimated total monthly cost**
+- **Leftover money per month**
+- **Rent as % of income**
+- **Breakdown of Rent vs Utilities vs Groceries vs Transport** (pie chart)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🔧 Tech stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Frontend:** React (Create React App)
+- **Charts:** `react-chartjs-2` + `chart.js`
+- **Styling:** Custom CSS (dark dashboard layout)
+- **Data:** Local JSON files based on real public sources
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📊 Data sources (simplified)
 
-### `npm run eject`
+Data is derived from:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Rent by borough:** ONS / VOA – *Private Rental Market Summary Statistics* (median monthly rents)
+- **Transport costs:** TfL – London Travelcard monthly fares (Zones 1–3 baseline)
+- **Groceries:** ONS / DEFRA – *Family Spending* & *Family Food* surveys (single adult estimates)
+- **Utilities:** Ofgem typical consumption & UK average bill estimates
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Values are cleaned and stored in:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- `src/data/rentData.json`
+- `src/data/transportData.json`
+- `src/data/groceryData.json`
+- `src/data/utilitiesData.json`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 🚀 Running the project
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+From the project root:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+cd dashboard
+npm install
+npm start
