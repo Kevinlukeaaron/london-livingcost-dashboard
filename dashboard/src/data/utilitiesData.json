@@ -1,0 +1,17 @@
+{
+  "single_flat": {
+    "low": 100,
+    "average": 140,
+    "high": 180
+  },
+  "one_bed": {
+    "low": 120,
+    "average": 160,
+    "high": 200
+  },
+  "two_bed": {
+    "low": 140,
+    "average": 190,
+    "high": 230
+  }
+}

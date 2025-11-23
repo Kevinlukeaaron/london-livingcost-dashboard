@@ -1,0 +1,9 @@
+{
+  "single_low": 180,
+  "single_medium": 240,
+  "single_high": 320,
+
+  "couple_low": 280,
+  "couple_medium": 360,
+  "couple_high": 450
+}
