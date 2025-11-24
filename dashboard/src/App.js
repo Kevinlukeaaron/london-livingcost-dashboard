@@ -21,16 +21,14 @@ function App() {
   const [groceriesValue, setGroceriesValue] = useState(0);
   const [transportValue, setTransportValue] = useState(0);
 
-  // ✅ Step 2 — store cheapest boroughs
+  // cheapest boroughs
   const [cheapestList, setCheapestList] = useState([]);
 
-  const formatMoney = (value) =>
-    `£${Number.isFinite(value) ? value.toFixed(0) : "0"}`;
+  const formatMoney = (v) => `£${Number.isFinite(v) ? v.toFixed(0) : "0"}`;
 
-  // ✅ Helper: compute cheapest boroughs based on current housing + lifestyle
+  // ---- COMPUTE CHEAPEST ----
   const getCheapestBoroughs = () => {
     const ranked = Object.entries(rentData).map(([boroughName, rent]) => {
-      // utilities
       let utilitiesKey = "single_flat";
       if (housingType === "1-bed flat") utilitiesKey = "one_bed";
 
@@ -39,31 +37,27 @@ function App() {
       if (lifestyle === "Comfortable") lifestyleKey = "high";
 
       const utilities =
-        utilitiesData[utilitiesKey]?.[lifestyleKey] !== undefined
-          ? utilitiesData[utilitiesKey][lifestyleKey]
-          : 0;
+        utilitiesData[utilitiesKey]?.[lifestyleKey] ?? 0;
 
-      // groceries
       let groceriesKey = "single_medium";
       if (lifestyle === "Frugal") groceriesKey = "single_low";
       if (lifestyle === "Comfortable") groceriesKey = "single_high";
 
       const groceries = groceryData[groceriesKey] || 0;
 
-      // transport (fixed for now)
       const transport = transportData["zones_1_3"] || 0;
 
       const totalCost = rent + utilities + groceries + transport;
-
       return { boroughName, totalCost };
     });
 
-    // Sort by cheapest → most expensive, return top 3
     return ranked.sort((a, b) => a.totalCost - b.totalCost).slice(0, 3);
   };
 
+  // ---- HANDLE ESTIMATE ----
   const handleEstimate = () => {
     const incomeNum = Number(income);
+
     if (!incomeNum || !borough) {
       setEstimatedTotal(0);
       setLeftover(0);
@@ -72,17 +66,13 @@ function App() {
       setUtilitiesValue(0);
       setGroceriesValue(0);
       setTransportValue(0);
-      setCheapestList([]); // also reset this
+      setCheapestList([]);
       return;
     }
 
-    // --- RENT (real data by borough) ---
     const rent = rentData[borough] || 0;
-
-    // --- TRANSPORT: assume Zones 1–3 baseline for now ---
     const transport = transportData["zones_1_3"] || 0;
 
-    // --- UTILITIES based on housing type + lifestyle ---
     let utilitiesKey = "single_flat";
     if (housingType === "1-bed flat") utilitiesKey = "one_bed";
 
@@ -91,11 +81,8 @@ function App() {
     if (lifestyle === "Comfortable") lifestyleKey = "high";
 
     const utilities =
-      utilitiesData[utilitiesKey]?.[lifestyleKey] !== undefined
-        ? utilitiesData[utilitiesKey][lifestyleKey]
-        : 0;
+      utilitiesData[utilitiesKey]?.[lifestyleKey] ?? 0;
 
-    // --- GROCERIES: single person + lifestyle ---
     let groceriesKey = "single_medium";
     if (lifestyle === "Frugal") groceriesKey = "single_low";
     if (lifestyle === "Comfortable") groceriesKey = "single_high";
@@ -104,6 +91,7 @@ function App() {
 
     const total = rent + utilities + groceries + transport;
     const left = incomeNum - total;
+
     const ratio = incomeNum > 0 ? (rent / incomeNum) * 100 : 0;
 
     setEstimatedTotal(total);
@@ -115,7 +103,6 @@ function App() {
     setGroceriesValue(groceries);
     setTransportValue(transport);
 
-    // ✅ Step 3 — update cheapest list whenever user estimates
     setCheapestList(getCheapestBoroughs());
   };
 
@@ -125,11 +112,12 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>London Living Cost Dashboard</h1>
-        <p>Estimate your monthly cost of living across different areas in London.</p>
+        <p>Estimate your monthly cost of living across London.</p>
       </header>
 
       <main className="app-main">
-        {/* Left column – inputs */}
+        
+        {/* LEFT SIDE */}
         <section className="panel panel-inputs">
           <h2>Inputs</h2>
 
@@ -151,9 +139,7 @@ function App() {
             >
               <option value="">Select a borough</option>
               {boroughOptions.map((b) => (
-                <option key={b} value={b}>
-                  {b}
-                </option>
+                <option key={b} value={b}>{b}</option>
               ))}
             </select>
           </div>
@@ -187,25 +173,21 @@ function App() {
           </button>
         </section>
 
-        {/* Right column – outputs */}
+        {/* RIGHT SIDE */}
         <section className="panel panel-output">
           <h2>Summary</h2>
 
           <div className="summary-grid">
             <div className="summary-card">
               <h3>Estimated total</h3>
-              <p className="summary-number">
-                {formatMoney(estimatedTotal)} / month
-              </p>
+              <p className="summary-number">{formatMoney(estimatedTotal)} / month</p>
               <p className="summary-sub">Based on your inputs.</p>
             </div>
 
             <div className="summary-card">
               <h3>Leftover</h3>
               <p className="summary-number">{formatMoney(leftover)}</p>
-              <p className="summary-sub">
-                After rent, bills, groceries & transport.
-              </p>
+              <p className="summary-sub">After essentials.</p>
             </div>
 
             <div className="summary-card">
@@ -213,10 +195,11 @@ function App() {
               <p className="summary-number">
                 {Number.isFinite(rentRatio) ? rentRatio.toFixed(1) : "0"}%
               </p>
-              <p className="summary-sub">of your net income.</p>
+              <p className="summary-sub">of income.</p>
             </div>
           </div>
 
+          {/* CHART */}
           <div className="panel panel-chart">
             <h2>Breakdown</h2>
             <CostBreakdownChart
@@ -227,20 +210,107 @@ function App() {
             />
           </div>
 
-          {/* ✅ Step 4 — Top 3 Cheapest Boroughs UI */}
+          {/* ---- BOROUGH INSIGHTS ---- */}
+          <div className="panel" style={{ marginTop: "16px" }}>
+            <h2>Borough insights</h2>
+
+            {estimatedTotal > 0 && borough ? (
+              <>
+                <p style={{ margin: 0, fontSize: 14 }}>
+                  For <strong>{borough}</strong>, your total cost is{" "}
+                  <strong>{formatMoney(estimatedTotal)}</strong> / month, leaving{" "}
+                  <strong>{formatMoney(leftover)}</strong>.
+                </p>
+
+                <p style={{ marginTop: 8, fontSize: 13, color: "#c7cad6" }}>
+                  Rent takes{" "}
+                  <strong>{rentRatio.toFixed(1)}%</strong> of your income.{" "}
+                  {leftover < 0
+                    ? "Unaffordable — you'd be in the red."
+                    : rentRatio > 40
+                    ? "High rent burden — consider cheaper boroughs."
+                    : rentRatio > 30
+                    ? "Borderline but manageable."
+                    : "Healthy ratio — fairly affordable."}
+                </p>
+              </>
+            ) : (
+              <p style={{ fontSize: 13, color: "#8b8fa3" }}>
+                Run an estimate to see insights.
+              </p>
+            )}
+          </div>
+
+          {/* ---- STATIC MAP PANEL ---- */}
+          <section className="panel panel-map" style={{ marginTop: "16px" }}>
+            <h2>Map view (static)</h2>
+
+            <p style={{ fontSize: "13px", color: "#8b8fa3", marginTop: 0 }}>
+              Selected borough:{" "}
+              {borough ? <strong>{borough}</strong> : "none selected yet"}
+            </p>
+
+            <img
+              src="/london-boroughs-map.png"
+              alt="London borough map"
+              className="map-image"
+              style={{
+                width: "100%",
+                borderRadius: "8px",
+                marginTop: "12px",
+                border: "1px solid #1f2435",
+              }}
+            />
+          </section>
+
+          {/* ---- TOP 3 CHEAPEST ---- */}
           <div className="panel" style={{ marginTop: "16px" }}>
             <h2>Top 3 Cheapest Boroughs</h2>
+
             {cheapestList.length === 0 ? (
               <p style={{ margin: 0 }}>Click "Estimate costs" to see suggestions.</p>
             ) : (
-              <ul style={{ margin: 0, paddingLeft: "18px" }}>
-                {cheapestList.map((item) => (
-                  <li key={item.boroughName}>
-                    <strong>{item.boroughName}</strong> — £
-                    {item.totalCost.toFixed(0)} / month
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul style={{ margin: 0, paddingLeft: "18px" }}>
+                  {cheapestList.map((item) => (
+                    <li key={item.boroughName}>
+                      <strong>{item.boroughName}</strong> — £
+                      {item.totalCost.toFixed(0)} / month
+                    </li>
+                  ))}
+                </ul>
+
+                <p
+                  style={{
+                    marginTop: "8px",
+                    fontSize: "12px",
+                    color: "#8b8fa3",
+                  }}
+                >
+                  Based on rent + utilities + groceries + transport (ONS / TFL / Ofgem / DEFRA)
+                </p>
+
+                {cheapestList.length > 0 && borough && (
+                  <p
+                    style={{
+                      marginTop: "6px",
+                      fontSize: "13px",
+                      color: "#c7cad6",
+                    }}
+                  >
+                    If you lived in <strong>{cheapestList[0].boroughName}</strong>{" "}
+                    instead of <strong>{borough}</strong>, you'd save{" "}
+                    <strong>
+                      £
+                      {(
+                        estimatedTotal -
+                        cheapestList[0].totalCost
+                      ).toFixed(0)}
+                    </strong>{" "}
+                    per month.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </section>
